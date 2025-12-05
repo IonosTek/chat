@@ -5,34 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IonosTek Link</title>
     <style>
-        /* --- GLOBAL STYLES --- */
-        body { margin: 0; background-color: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        /* --- GLOBAL & LAYOUT --- */
+        body { margin: 0; background-color: #0f172a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; height: 100vh; display: flex; overflow: hidden; }
         
         /* --- LOGIN SCREEN --- */
-        #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; }
-        .card { background-color: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { margin: 0 0 10px 0; letter-spacing: 1px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #334155; border: 1px solid #475569; color: white; border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        button:hover { background: #2563eb; }
+        #login-screen { position: absolute; top:0; left:0; width:100%; height:100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #0f172a; z-index: 100; transition: top 0.5s ease-in-out; }
+        .card { background-color: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); border: 1px solid #334155; }
+        input { width: 100%; padding: 12px; margin: 15px 0; background: #334155; border: 1px solid #475569; color: white; border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        button:hover { background: #1d4ed8; }
 
-        /* --- CHAT SCREEN (Hidden by default) --- */
-        #chat-screen { display: none; flex-direction: column; width: 100%; max-width: 600px; height: 100%; background: #1e293b; border-left: 1px solid #334155; border-right: 1px solid #334155; }
-        #header { padding: 15px; background: #0f172a; border-bottom: 1px solid #334155; text-align: center; font-weight: bold; letter-spacing: 1px; }
+        /* --- MAIN APP LAYOUT (Chat + Sidebar) --- */
+        #app-container { display: flex; width: 100%; height: 100%; opacity: 0; transition: opacity 1s; } /* Hidden initially */
         
-        #messages { flex: 1; list-style-type: none; margin: 0; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        /* LEFT: CHAT AREA */
+        #chat-section { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #1e293b; position: relative; }
+        #header { padding: 15px; background: #1e293b; border-bottom: 1px solid #334155; font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; }
+        .freq-badge { background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 10px; }
+
+        #messages { flex: 1; list-style-type: none; margin: 0; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         
-        /* Message Bubbles */
-        .msg { padding: 10px 15px; border-radius: 8px; max-width: 80%; word-wrap: break-word; font-size: 14px; }
-        .msg.system { align-self: center; background: transparent; color: #64748b; font-size: 12px; font-style: italic; }
+        /* Message Styles */
+        .msg { padding: 8px 12px; border-radius: 6px; max-width: 80%; word-wrap: break-word; font-size: 14px; line-height: 1.4; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .msg.system { align-self: flex-start; background: transparent; color: #fbbf24; font-family: monospace; font-size: 12px; width: 100%; border-left: 3px solid #fbbf24; padding-left: 10px; margin-bottom: 5px; }
         .msg.others { align-self: flex-start; background: #334155; }
-        .msg.me { align-self: flex-end; background: #3b82f6; }
-        .username { font-weight: bold; font-size: 11px; margin-bottom: 2px; color: #94a3b8; display: block; }
+        .msg.me { align-self: flex-end; background: #2563eb; }
+        
+        .meta { font-size: 10px; opacity: 0.7; margin-bottom: 2px; display: flex; justify-content: space-between; gap: 10px; }
+        .username { font-weight: bold; color: #93c5fd; }
 
         /* Input Area */
-        #form { display: flex; padding: 10px; background: #0f172a; border-top: 1px solid #334155; }
-        #input-msg { flex: 1; text-align: left; margin: 0; margin-right: 10px; }
-        #send-btn { width: 80px; }
+        #form { display: flex; padding: 15px; background: #1e293b; border-top: 1px solid #334155; }
+        #input-msg { flex: 1; text-align: left; margin-right: 10px; }
+        #send-btn { width: 80px; background: #3b82f6; }
+
+        /* RIGHT: SIDEBAR (USER LIST) */
+        #sidebar { width: 250px; background: #111827; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #334155; }
+        #sidebar h3 { margin: 0 0 20px 0; font-size: 14px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        #user-list { list-style: none; padding: 0; margin: 0; }
+        .user-item { padding: 8px 12px; background: #1f2937; border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; font-size: 14px; border: 1px solid #374151; }
+        .status-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 5px #22c55e; }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            #sidebar { display: none; } /* Hide sidebar on mobile for now */
+        }
     </style>
 </head>
 <body>
@@ -40,84 +59,132 @@
     <div id="login-screen">
         <div class="card">
             <h2>IONOSTEK</h2>
-            <p style="color:#94a3b8; font-size:14px;">Secure Channel</p>
-            <input id="username" placeholder="Enter Callsign / Name" autocomplete="off" />
+            <p style="color:#94a3b8; margin-top:0;">Secure Communication Relay</p>
+            <input id="username" placeholder="Callsign / Name" autocomplete="off" />
             <button id="join-btn">CONNECT</button>
         </div>
     </div>
 
-    <div id="chat-screen">
-        <div id="header">FREQUENCY: 145.000 MHz</div>
-        <ul id="messages"></ul>
-        <form id="form" action="">
-            <input id="input-msg" autocomplete="off" placeholder="Type a message..." />
-            <button id="send-btn">SEND</button>
-        </form>
+    <div id="app-container">
+        <div id="chat-section">
+            <div id="header">
+                <span class="freq-badge">145.000 MHz</span>
+                IonosTek Channel
+            </div>
+            <ul id="messages"></ul>
+            <form id="form">
+                <input id="input-msg" autocomplete="off" placeholder="Type a message..." />
+                <button id="send-btn">SEND</button>
+            </form>
+        </div>
+
+        <div id="sidebar">
+            <h3>Online Stations</h3>
+            <ul id="user-list">
+                </ul>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        let myName = "";
 
         // Elements
         const loginScreen = document.getElementById('login-screen');
-        const chatScreen = document.getElementById('chat-screen');
+        const appContainer = document.getElementById('app-container');
         const usernameInput = document.getElementById('username');
         const joinBtn = document.getElementById('join-btn');
         const form = document.getElementById('form');
         const inputMsg = document.getElementById('input-msg');
         const messages = document.getElementById('messages');
+        const userList = document.getElementById('user-list');
 
-        let myName = "";
+        // --- FUNCTIONS ---
 
-        // --- STEP 1: JOIN ---
+        function renderMessage(data) {
+            const item = document.createElement('li');
+            
+            // Format HTML for message
+            if (data.user === 'SYSTEM') {
+                item.className = 'msg system';
+                item.textContent = `${data.time} SYSTEM: ${data.text}`;
+            } else {
+                const isMe = data.user === myName;
+                item.className = isMe ? 'msg me' : 'msg others';
+                
+                // Content
+                item.innerHTML = `
+                    <div class="meta">
+                        <span class="username">${data.user}</span>
+                        <span>${data.time}</span>
+                    </div>
+                    <div>${data.text}</div>
+                `;
+            }
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function updateUserList(users) {
+            userList.innerHTML = ''; // Clear list
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.className = 'user-item';
+                // Highlight myself
+                const displayName = (user === myName) ? `${user} (YOU)` : user;
+                const style = (user === myName) ? 'color:#60a5fa; font-weight:bold;' : 'color:#e2e8f0;';
+                
+                li.innerHTML = `<span class="status-dot"></span><span style="${style}">${displayName}</span>`;
+                userList.appendChild(li);
+            });
+        }
+
         function joinChat() {
             const name = usernameInput.value.trim();
             if (name) {
                 myName = name;
                 socket.emit('join', name);
-                loginScreen.style.display = 'none'; // ซ่อนหน้า Login
-                chatScreen.style.display = 'flex';  // แสดงหน้า Chat
-                inputMsg.focus();
+                
+                // Animation: Slide up login, Fade in app
+                loginScreen.style.top = '-100%'; 
+                setTimeout(() => {
+                    appContainer.style.opacity = '1';
+                }, 300);
             }
         }
+
+        // --- EVENTS ---
 
         joinBtn.addEventListener('click', joinChat);
         usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') joinChat(); });
 
-        // --- STEP 2: SEND MESSAGE ---
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (inputMsg.value) {
                 socket.emit('chat message', inputMsg.value);
                 inputMsg.value = '';
+                inputMsg.focus();
             }
         });
 
-        // --- STEP 3: RECEIVE MESSAGE ---
-        socket.on('chat message', function(data) {
-            const item = document.createElement('li');
-            
-            if (data.user === myName) {
-                item.className = 'msg me';
-                item.innerHTML = `${data.text}`;
-            } else {
-                item.className = 'msg others';
-                item.innerHTML = `<span class="username">${data.user}</span>${data.text}`;
-            }
-            
-            messages.appendChild(item);
-            messages.scrollTop = messages.scrollHeight; // Auto scroll
+        // 1. Receive Chat Message
+        socket.on('chat message', (data) => renderMessage(data));
+
+        // 2. Receive System Message
+        socket.on('system message', (text) => {
+            const time = new Date().toISOString().substring(11, 16) + " UTC";
+            renderMessage({ user: 'SYSTEM', text: text, time: time });
         });
 
-        // System messages
-        socket.on('system message', function(msg) {
-            const item = document.createElement('li');
-            item.className = 'msg system';
-            item.textContent = msg;
-            messages.appendChild(item);
-            messages.scrollTop = messages.scrollHeight;
+        // 3. Receive History (When first joining)
+        socket.on('load history', (history) => {
+            history.forEach(msg => renderMessage(msg));
         });
+
+        // 4. Update User List
+        socket.on('update user list', (users) => updateUserList(users));
+
     </script>
 </body>
 </html>
