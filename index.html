@@ -11,8 +11,9 @@
         /* --- LOGIN SCREEN --- */
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; }
         .card { background-color: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #334155; border: 1px solid #475569; color: white; border-radius: 6px; box-sizing: border-box; text-align: center; }
-        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        h2 { margin: 0 0 10px 0; letter-spacing: 1px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #334155; border: 1px solid #475569; color: white; border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
         button:hover { background: #2563eb; }
 
         /* --- CHAT SCREEN (Hidden by default) --- */
@@ -74,9 +75,9 @@
             const name = usernameInput.value.trim();
             if (name) {
                 myName = name;
-                socket.emit('join', name); // Tell server we are here
-                loginScreen.style.display = 'none'; // Hide login
-                chatScreen.style.display = 'flex';  // Show chat
+                socket.emit('join', name);
+                loginScreen.style.display = 'none'; // ซ่อนหน้า Login
+                chatScreen.style.display = 'flex';  // แสดงหน้า Chat
                 inputMsg.focus();
             }
         }
@@ -97,7 +98,6 @@
         socket.on('chat message', function(data) {
             const item = document.createElement('li');
             
-            // Check who sent it to style appropriately
             if (data.user === myName) {
                 item.className = 'msg me';
                 item.innerHTML = `${data.text}`;
@@ -107,15 +107,16 @@
             }
             
             messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight); // Auto scroll down
+            messages.scrollTop = messages.scrollHeight; // Auto scroll
         });
 
-        // System messages (Join/Leave)
+        // System messages
         socket.on('system message', function(msg) {
             const item = document.createElement('li');
             item.className = 'msg system';
             item.textContent = msg;
             messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
         });
     </script>
 </body>
