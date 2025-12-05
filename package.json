@@ -1,13 +1,22 @@
 {
-  "name": "ionostek-chat",
+  "name": "ionostek-server",
   "version": "1.0.0",
-  "description": "Retro Ham Radio Chat",
+  "description": "Server for IonosTek Amateur Radio Monitor",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "keywords": [
+    "ham-radio",
+    "express",
+    "ionostek"
+  ],
+  "author": "HS5IHQ / K1MP",
+  "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.7.2"
+    "express": "^4.21.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
