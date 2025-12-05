@@ -4,51 +4,42 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
-// ตั้งค่า Socket.io (รองรับรูปภาพ 5MB)
+// ตั้งค่า Socket.io
 const io = new Server(server, {
-    cors: { origin: "*" }, 
-    maxHttpBufferSize: 5e6 
+    cors: { origin: "*" },
+    maxHttpBufferSize: 5e6 // 5MB
 });
 
-// ตัวแปรเก็บข้อมูล
+// --- ส่วนเก็บข้อมูล (Memory) ---
 let users = {};
-let messageHistory = []; 
-const HISTORY_LIMIT = 24 * 60 * 60 * 1000; // 24 ชม.
+let messageHistory = [];
+const HISTORY_LIMIT = 24 * 60 * 60 * 1000; // 24 ชั่วโมง
 
-// เสิร์ฟไฟล์ index.html
 app.get('/', (req, res) => {
-  // ใช้ path.join เพื่อความชัวร์เรื่อง Path ของไฟล์
   res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', (socket) => {
-  console.log('New connection: ' + socket.id);
+  console.log('User connected: ' + socket.id);
 
+  // 1. เมื่อมีคน Join
   socket.on('join', (callsign) => {
     if (!callsign) return;
     
     users[socket.id] = callsign;
     
-    // --- ระบบส่งประวัติเก่า (Safe Mode) ---
-    try {
-        const now = Date.now();
-        // กรองเอาเฉพาะข้อความที่ไม่หมดอายุ
-        messageHistory = messageHistory.filter(item => (now - item.timestamp) < HISTORY_LIMIT);
-        
-        // ส่งย้อนหลังให้คนใหม่
-        messageHistory.forEach(item => {
-            if(item.type && item.data) {
-                socket.emit(item.type, item.data);
-            }
-        });
-    } catch (e) {
-        console.error("History Error (Ignored):", e);
-    }
-    // ------------------------------------
-
-    io.emit('user list', Object.values(users));
+    // ส่งประวัติย้อนหลัง (History)
+    const now = Date.now();
+    // กรองเอาเฉพาะข้อความที่ไม่หมดอายุ
+    messageHistory = messageHistory.filter(item => (now - item.timestamp) < HISTORY_LIMIT);
     
-    // แจ้งเตือน System
+    // วนลูปส่งข้อมูลเก่า
+    messageHistory.forEach(item => {
+        socket.emit(item.type, item.data);
+    });
+
+    // แจ้งเตือนคนเข้าห้อง
+    io.emit('user list', Object.values(users));
     const time = new Date().toISOString().slice(11, 16);
     io.emit('chat message', { 
         time: time, 
@@ -57,47 +48,19 @@ io.on('connection', (socket) => {
     });
   });
 
-  // รับข้อความ
+  // 2. เมื่อมีข้อความเข้า (Text)
   socket.on('chat message', (msg) => {
     if (!msg) return;
-    processMessage('chat message', msg, socket);
+    handleMessage(socket, 'chat message', msg);
   });
 
-  // รับรูปภาพ
+  // 3. เมื่อมีรูปภาพเข้า (Image)
   socket.on('chat image', (imgData) => {
     if (!imgData) return;
-    processMessage('chat image', imgData, socket);
+    handleMessage(socket, 'chat image', imgData);
   });
 
-  // ฟังก์ชั่นกลางสำหรับจัดการข้อความและบันทึกประวัติ
-  function processMessage(type, content, socket) {
-      try {
-          const now = Date.now();
-          const time = new Date().toISOString().slice(11, 16);
-          const callsign = users[socket.id] || 'Guest';
-          
-          let dataPackage;
-          if (type === 'chat message') {
-              dataPackage = { time: time, user: callsign, msg: content };
-          } else {
-              dataPackage = { time: time, user: callsign, image: content };
-          }
-
-          // บันทึกลงประวัติ
-          messageHistory.push({ type: type, data: dataPackage, timestamp: now });
-          
-          // ลบของเก่าทิ้ง (กัน Memory เต็ม)
-          if (messageHistory.length > 500) { 
-              messageHistory.shift(); 
-          }
-
-          // ส่งให้ทุกคน
-          io.emit(type, dataPackage);
-      } catch (err) {
-          console.error("Processing Error:", err);
-      }
-  }
-
+  // 4. เมื่อมีคนออก
   socket.on('disconnect', () => {
     if (users[socket.id]) {
         io.emit('user list', Object.values(users));
@@ -106,7 +69,38 @@ io.on('connection', (socket) => {
   });
 });
 
-// รัน Server
+// --- ฟังก์ชันแยก (อยู่นอก Socket เพื่อป้องกันวงเล็บงง) ---
+function handleMessage(socket, type, content) {
+    try {
+        const now = Date.now();
+        const time = new Date().toISOString().slice(11, 16);
+        const callsign = users[socket.id] || 'Guest';
+        
+        // สร้างแพ็คเกจข้อมูล
+        let dataPackage = { time: time, user: callsign };
+        if (type === 'chat message') {
+            dataPackage.msg = content;
+        } else {
+            dataPackage.image = content;
+        }
+
+        // บันทึกลงความจำ (History)
+        messageHistory.push({ type: type, data: dataPackage, timestamp: now });
+        
+        // ถ้าเก็บเยอะเกิน 500 ข้อความ ให้ลบอันเก่าสุดทิ้ง (กันเมมเต็ม)
+        if (messageHistory.length > 500) {
+            messageHistory.shift();
+        }
+
+        // ส่งให้ทุกคน
+        io.emit(type, dataPackage);
+        
+    } catch (err) {
+        console.error("Error processing message:", err);
+    }
+}
+
+// เริ่มต้น Server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
