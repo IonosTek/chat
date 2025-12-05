@@ -19,7 +19,9 @@ io.on('connection', (socket) => {
   console.log('New connection established');
 
   socket.on('join', (callsign) => {
+    // Prevent empty callsigns
     if (!callsign) return;
+    
     users[socket.id] = callsign;
     io.emit('user list', Object.values(users));
     
