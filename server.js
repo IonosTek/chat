@@ -9,36 +9,58 @@ const io = new Server(server);
 
 const port = process.env.PORT || 3000;
 
-// 1. Serve index.html
+// ตัวแปรเก็บข้อมูล (ในหน่วยความจำ Server)
+let onlineUsers = {};   // เก็บชื่อคนออนไลน์ { socketID: "Max" }
+let messageHistory = []; // เก็บข้อความย้อนหลัง
+
+// Serve HTML
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// 2. Real-time Connection Logic
+// Real-time Logic
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    console.log('User connected:', socket.id);
 
-    // Handle user joining
+    // 1. เมื่อมีคน Join
     socket.on('join', (username) => {
+        // บันทึกชื่อ
         socket.username = username;
+        onlineUsers[socket.id] = username;
+
+        // A. ส่งประวัติข้อความเก่าให้ "เฉพาะคนใหม่" ดู
+        socket.emit('load history', messageHistory);
+
+        // B. บอกทุกคนว่ามีคนใหม่มา
         io.emit('system message', `${username} has joined the frequency.`);
+
+        // C. อัปเดตรายชื่อคนออนไลน์ให้ "ทุกคน" เห็น
+        io.emit('update user list', Object.values(onlineUsers));
     });
 
-    // Handle chat messages
+    // 2. เมื่อมีข้อความใหม่
     socket.on('chat message', (msg) => {
-        // Send message to everyone including sender
-        io.emit('chat message', { user: socket.username, text: msg });
+        const time = new Date().toISOString().substring(11, 16) + " UTC";
+        const msgData = { user: socket.username, text: msg, time: time };
+
+        // เก็บลงประวัติ (จำแค่ 50 ข้อความล่าสุดพอ เดี๋ยวเมมเต็ม)
+        messageHistory.push(msgData);
+        if (messageHistory.length > 50) messageHistory.shift();
+
+        // ส่งให้ทุกคน
+        io.emit('chat message', msgData);
     });
 
-    // Handle disconnect
+    // 3. เมื่อมีคนออก
     socket.on('disconnect', () => {
         if (socket.username) {
-            io.emit('system message', `${socket.username} lost connection.`);
+            delete onlineUsers[socket.id]; // ลบชื่อออก
+            io.emit('system message', `${socket.username} lost connection.`); // บอกคนอื่น
+            io.emit('update user list', Object.values(onlineUsers)); // อัปเดตรายชื่อใหม่
         }
     });
 });
 
-// 3. Start Server (Must use server.listen, not app.listen)
 server.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });
