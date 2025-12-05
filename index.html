@@ -138,4 +138,99 @@
                 }
 
                 item.innerHTML = `
-                    <div class="meta
+                    <div class="meta"><span class="username">${data.user}</span><span>${data.time}</span></div>
+                    ${contentHtml}
+                `;
+            }
+
+            // System Message
+            if (!data.type && data.user === undefined) { 
+                 // Handle legacy system messages if any
+            }
+
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Render System Message specific
+        socket.on('system message', (text) => {
+            const item = document.createElement('li');
+            item.className = 'msg system';
+            item.textContent = `[SYSTEM] ${text}`;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+        function updateUserList(users) {
+            userList.innerHTML = ''; 
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.className = 'user-item';
+                const displayName = (user === myName) ? `${user} (YOU)` : user;
+                const style = (user === myName) ? 'color:#60a5fa; font-weight:bold;' : 'color:#e2e8f0;';
+                li.innerHTML = `<span class="status-dot"></span><span style="${style}">${displayName}</span>`;
+                userList.appendChild(li);
+            });
+        }
+
+        // --- EVENTS ---
+
+        // Login
+        joinBtn.addEventListener('click', () => {
+            const name = usernameInput.value.trim();
+            if (name) {
+                myName = name;
+                socket.emit('join', name);
+                loginScreen.style.top = '-100%';
+                setTimeout(() => { appContainer.style.opacity = '1'; }, 300);
+            }
+        });
+        usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') joinBtn.click(); });
+
+        // Send Text
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (inputMsg.value) {
+                socket.emit('chat message', inputMsg.value);
+                inputMsg.value = '';
+                inputMsg.focus();
+            }
+        });
+
+        // Click Clip -> Open File Dialog
+        clipBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle File Selection
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // Check size (Limit to 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("File is too large! Max 5MB.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Send to server
+                    socket.emit('upload', { 
+                        name: file.name, 
+                        type: file.type, 
+                        data: e.target.result // Base64 Data
+                    });
+                };
+                reader.readAsDataURL(file);
+                this.value = ''; // Reset input
+            }
+        });
+
+        // Socket Listeners
+        socket.on('chat message', (data) => renderMessage(data));
+        socket.on('load history', (history) => { history.forEach(msg => renderMessage(msg)); });
+        socket.on('update user list', (users) => updateUserList(users));
+
+    </script>
+</body>
+</html>
