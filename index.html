@@ -1,63 +1,193 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DX Cluster Chat TSSBUG</title>
+    <title>IONOSTEK TACTICAL CHAT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* สไตล์ย้อนยุคแบบ ON4KST */
-        body { margin: 0; font-family: 'Courier New', Courier, monospace; background-color: #f0f0f0; display: flex; flex-direction: column; height: 100vh; }
+        /* --- TACTICAL THEME SETTINGS --- */
+        :root {
+            --bg-color: #001014;       /* พื้นหลังดำอมเขียวขี้ม้าเข้มๆ */
+            --panel-bg: #00222b;       /* สีพื้นหลังกล่อง */
+            --text-color: #00ffcc;     /* สีตัวหนังสือ (Cyan แบบจอเรดาร์) */
+            --accent-color: #ff3333;   /* สีเน้น (แดง) สำหรับ User */
+            --border-color: #004455;   /* ขอบตาราง */
+            --time-color: #88aadd;     /* สีเวลา */
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Courier New', Courier, monospace; /* ฟอนต์พิมพ์ดีด */
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+        }
         
-        /* ส่วน Login */
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ddd; display: flex; justify-content: center; align-items: center; z-index: 99; }
-        #login-box { background: #fff; padding: 20px; border: 2px solid #000; text-align: center; }
+        /* หน้า Login สไตล์ทหาร */
+        #login-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg-color); 
+            display: flex; justify-content: center; align-items: center; z-index: 99; 
+        }
+        #login-box { 
+            background: var(--panel-bg); 
+            padding: 30px; 
+            border: 2px solid var(--text-color); 
+            text-align: center; 
+            box-shadow: 0 0 15px var(--text-color); /* เอฟเฟกต์เรืองแสง */
+            width: 300px;
+        }
+        h2 { margin-top: 0; letter-spacing: 2px; text-shadow: 0 0 5px var(--text-color); }
+        
+        input { 
+            background: #000; 
+            color: var(--text-color); 
+            border: 1px solid var(--border-color); 
+            padding: 10px; 
+            font-family: inherit; 
+            text-align: center; 
+            text-transform: uppercase;
+            width: 80%;
+            outline: none;
+        }
+        
+        button { 
+            margin-top: 15px;
+            padding: 10px 25px; 
+            background: var(--border-color); 
+            color: #fff; 
+            border: 1px solid var(--text-color); 
+            font-family: inherit; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+        button:hover { background: var(--text-color); color: #000; box-shadow: 0 0 10px var(--text-color); }
         
         /* Layout หลัก */
-        #main-container { display: flex; flex: 1; overflow: hidden; display: none; } /* ซ่อนไว้ก่อน Login */
+        #main-container { display: flex; flex: 1; overflow: hidden; display: none; }
         
         /* พื้นที่แชท (ซ้าย) */
-        #chat-area { flex: 3; background-color: #ffffcc; border-right: 2px solid #999; overflow-y: scroll; padding: 10px; display: flex; flex-direction: column; }
-        .message-line { border-bottom: 1px dotted #ccc; padding: 2px 0; font-size: 14px; }
-        .time { color: #000080; font-weight: bold; margin-right: 5px; }
-        .user { color: #800000; font-weight: bold; margin-right: 5px; }
-        .msg { color: #000; }
+        #chat-area { 
+            flex: 3; 
+            background-color: var(--bg-color); 
+            border-right: 2px solid var(--border-color); 
+            overflow-y: scroll; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        /* Scrollbar สวยๆ */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); }
+
+        .message-line { 
+            border-bottom: 1px dashed #003344; 
+            padding: 4px 0; 
+            font-size: 15px; 
+            line-height: 1.5;
+        }
+        .time { color: var(--time-color); font-weight: bold; margin-right: 8px; font-size: 0.9em; }
+        .user { color: var(--accent-color); font-weight: bold; margin-right: 5px; }
+        .msg { color: var(--text-color); text-shadow: 0 0 2px rgba(0,255,204,0.3); }
 
         /* พื้นที่รายชื่อคนออนไลน์ (ขวา) */
-        #user-list-area { flex: 1; background-color: #e0e0e0; padding: 10px; overflow-y: auto; }
-        #user-list-area h3 { margin-top: 0; border-bottom: 2px solid #000; font-size: 16px; }
-        .online-user { color: #006400; font-weight: bold; display: block; }
+        #user-list-area { 
+            flex: 1; 
+            background-color: var(--panel-bg); 
+            padding: 10px; 
+            overflow-y: auto; 
+            max-width: 250px; 
+            border-left: 1px solid #000;
+        }
+        #user-list-area h3 { 
+            border-bottom: 2px solid var(--text-color); 
+            font-size: 14px; 
+            text-align: center; 
+            padding-bottom: 5px;
+            color: #fff;
+        }
+        .online-user { 
+            color: var(--text-color); 
+            font-weight: bold; 
+            display: block; 
+            margin-bottom: 5px; 
+            padding-left: 10px;
+            border-left: 3px solid var(--border-color);
+        }
 
         /* กล่องพิมพ์ข้อความ (ล่าง) */
-        #input-area { background: #ccc; padding: 10px; display: flex; border-top: 2px solid #999; display: none; }
-        #input { flex: 1; padding: 5px; font-family: 'Courier New', monospace; }
-        button { padding: 5px 15px; font-family: 'Courier New', monospace; font-weight: bold; cursor: pointer; }
+        #input-area { 
+            background: var(--panel-bg); 
+            padding: 15px; 
+            display: flex; 
+            border-top: 2px solid var(--border-color); 
+            display: none; 
+        }
+        #input { 
+            flex: 1; 
+            text-align: left; 
+            border: 1px solid var(--text-color);
+        }
+        #send-btn {
+            margin-top: 0;
+            margin-left: 10px;
+            background: var(--bg-color);
+        }
+
     </style>
 </head>
 <body>
 
+    <audio id="beep-sound">
+        <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU..." type="audio/wav">
+        </audio>
+
     <div id="login-screen">
         <div id="login-box">
-            <h2>DX CHAT LOGIN</h2>
-            <input id="callsign-input" placeholder="Enter Callsign (e.g. HS1ABC)" style="text-transform: uppercase;">
-            <button onclick="login()">Connect</button>
+            <h2>SECURE LINK</h2>
+            <p style="font-size: 12px; margin-bottom: 20px;">AUTHORIZATION REQUIRED</p>
+            <input id="callsign-input" placeholder="CALLSIGN" autocomplete="off">
+            <br>
+            <button onclick="login()">ESTABLISH LINK</button>
         </div>
     </div>
 
     <div id="main-container">
         <div id="chat-area"></div>
         <div id="user-list-area">
-            <h3>Stations Online</h3>
+            <h3>ACTIVE STATIONS</h3>
             <div id="users"></div>
         </div>
     </div>
 
     <form id="input-area" action="">
-        <input id="input" autocomplete="off" placeholder="Type message..." /><button>Send</button>
+        <input id="input" autocomplete="off" placeholder="TRANSMIT MESSAGE..." />
+        <button id="send-btn">TX</button>
     </form>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
         var myCallsign = "";
+        
+        // สร้างเสียง Beep สั้นๆ ความถี่ 800Hz แบบวิทยุ
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep() {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'square'; // เสียงแบบดิจิตอล
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // ความถี่ 800Hz
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // ความดัง 10%
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1); // ดังแค่ 0.1 วินาที
+        }
 
         function login() {
             var input = document.getElementById('callsign-input');
@@ -66,9 +196,10 @@
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-container').style.display = 'flex';
                 document.getElementById('input-area').style.display = 'flex';
-                
-                // ส่งชื่อให้ Server
                 socket.emit('join', myCallsign);
+                
+                // กระตุ้น Audio Context ให้พร้อมใช้งาน
+                if (audioCtx.state === 'suspended') { audioCtx.resume(); }
             }
         }
 
@@ -85,27 +216,46 @@
             }
         });
 
-        // รับข้อความ
         socket.on('chat message', function(data) {
             var item = document.createElement('div');
             item.className = 'message-line';
-            // Format: [TIME] CALLSIGN: MESSAGE
-            item.innerHTML = `<span class="time">[${data.time}z]</span> <span class="user">&lt;${data.user}&gt;</span> <span class="msg">${data.msg}</span>`;
+            
+            // จัดรูปแบบเวลาและข้อความ
+            var timeHtml = `<span class="time">[${data.time}z]</span>`;
+            var userHtml = `<span class="user">&lt;${data.user}&gt;</span>`;
+            
+            // ถ้าเป็นข้อความจากระบบ ให้เป็นสีเหลือง
+            if(data.user === 'SYSTEM') {
+                userHtml = `<span class="user" style="color:yellow;">&lt;SYSTEM&gt;</span>`;
+            }
+
+            item.innerHTML = `${timeHtml} ${userHtml} <span class="msg">${data.msg}</span>`;
             chatArea.appendChild(item);
-            chatArea.scrollTop = chatArea.scrollHeight; // เลื่อนลงล่างสุดเสมอ
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            // เล่นเสียง Beep (ถ้าไม่ใช่ข้อความที่เราส่งเอง)
+            if (data.user !== myCallsign) {
+                playBeep();
+            }
         });
 
-        // อัปเดตรายชื่อคน
         socket.on('user list', function(users) {
             usersDiv.innerHTML = "";
             users.forEach(function(u) {
                 var div = document.createElement('div');
                 div.className = 'online-user';
-                div.textContent = u;
+                
+                // ไฮไลท์ชื่อตัวเอง
+                if(u === myCallsign) {
+                    div.style.color = "#ff3333";
+                    div.textContent = u + " (YOU)";
+                } else {
+                    div.textContent = u;
+                }
+                
                 usersDiv.appendChild(div);
             });
         });
     </script>
 </body>
-
 </html>
