@@ -2,52 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>IonosTek Link</title>
     <style>
         /* --- GLOBAL & LAYOUT --- */
-        body { margin: 0; background-color: #0f172a; font-family: 'Segoe UI', sans-serif; color: white; height: 100vh; display: flex; overflow: hidden; }
+        body { 
+            margin: 0; 
+            background-color: #0f172a; 
+            font-family: 'Segoe UI', sans-serif; 
+            color: white; 
+            /* ใช้ dvh เพื่อให้พอดีกับจอมือถือจริงๆ (รวมตอนคีย์บอร์ดขึ้น) */
+            height: 100dvh; 
+            display: flex; 
+            overflow: hidden; 
+        }
         
         /* LOGIN SCREEN */
         #login-screen { position: absolute; top:0; left:0; width:100%; height:100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #0f172a; z-index: 100; transition: top 0.5s ease-in-out; }
-        .card { background-color: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); border: 1px solid #334155; }
+        .card { background-color: #1e293b; padding: 30px; border-radius: 12px; text-align: center; width: 85%; max-width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); border: 1px solid #334155; }
         input.login-input { width: 100%; padding: 12px; margin: 15px 0; background: #334155; border: 1px solid #475569; color: white; border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 16px; }
         button.primary-btn { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        button.primary-btn:hover { background: #1d4ed8; }
 
         /* APP CONTAINER */
         #app-container { display: flex; width: 100%; height: 100%; opacity: 0; transition: opacity 1s; } 
         
         /* CHAT AREA */
-        #chat-section { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #1e293b; position: relative; }
-        #header { padding: 15px; background: #1e293b; border-bottom: 1px solid #334155; font-weight: bold; display: flex; align-items: center; }
+        #chat-section { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #1e293b; position: relative; height: 100%; }
+        #header { padding: 15px; background: #1e293b; border-bottom: 1px solid #334155; font-weight: bold; display: flex; align-items: center; flex-shrink: 0; }
         .freq-badge { background: #0ea5e9; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 10px; }
 
-        #messages { flex: 1; list-style-type: none; margin: 0; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        /* Messages Area */
+        #messages { 
+            flex: 1; 
+            list-style-type: none; 
+            margin: 0; 
+            padding: 15px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            /* เพิ่ม Padding ด้านล่างเผื่อไว้หน่อยในมือถือ */
+            padding-bottom: 20px;
+        }
         
-        /* MESSAGES */
-        .msg { padding: 10px 12px; border-radius: 6px; max-width: 70%; word-wrap: break-word; font-size: 14px; line-height: 1.4; animation: fadeIn 0.3s ease; }
+        /* MESSAGES STYLES */
+        .msg { padding: 10px 12px; border-radius: 6px; max-width: 80%; word-wrap: break-word; font-size: 14px; line-height: 1.4; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .msg.system { align-self: center; background: transparent; color: #fbbf24; font-size: 12px; border: 1px solid #fbbf24; padding: 4px 15px; border-radius: 20px; margin-bottom: 5px; width: auto; max-width: 90%; }
+        .msg.system { align-self: center; background: rgba(251, 191, 36, 0.1); color: #fbbf24; font-size: 12px; border: 1px solid rgba(251, 191, 36, 0.3); padding: 4px 15px; border-radius: 20px; margin-bottom: 5px; text-align: center; }
         .msg.others { align-self: flex-start; background: #334155; border-bottom-left-radius: 0; }
         .msg.me { align-self: flex-end; background: #2563eb; border-bottom-right-radius: 0; }
         
         .meta { font-size: 10px; opacity: 0.7; margin-bottom: 4px; display: flex; justify-content: space-between; gap: 10px; }
         .username { font-weight: bold; color: #93c5fd; }
-
-        /* IMAGES IN CHAT */
         .chat-image { max-width: 100%; border-radius: 4px; margin-top: 5px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
         .file-link { color: #fff; text-decoration: underline; display: block; margin-top: 5px; }
 
         /* INPUT AREA */
-        #form { display: flex; padding: 15px; background: #1e293b; border-top: 1px solid #334155; align-items: center; }
-        #input-msg { flex: 1; text-align: left; margin: 0 10px; padding: 12px; background: #334155; border: 1px solid #475569; border-radius: 6px; color: white; }
+        #form { 
+            display: flex; 
+            padding: 10px; 
+            background: #1e293b; 
+            border-top: 1px solid #334155; 
+            align-items: center; 
+            flex-shrink: 0; /* ห้ามโดนบีบอัด */
+            /* ป้องกันการเด้งตกขอบใน iOS */
+            position: sticky; 
+            bottom: 0;
+            padding-bottom: env(safe-area-inset-bottom, 10px); /* รองรับ iPhone จอแหว่ง */
+        }
+        
+        #input-msg { flex: 1; text-align: left; margin: 0 8px; padding: 10px; background: #334155; border: 1px solid #475569; border-radius: 6px; color: white; font-size: 16px; /* 16px ป้องกัน iOS ซูมตอนกดพิมพ์ */ }
         
         /* Buttons */
-        .icon-btn { width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; background: #475569; border: none; border-radius: 6px; cursor: pointer; color: white; font-size: 20px; transition: 0.2s; }
-        .icon-btn:hover { background: #64748b; }
-        #send-btn { width: 80px; background: #3b82f6; font-weight: bold; font-size: 14px; margin-left: 10px; }
+        .icon-btn { width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background: #475569; border: none; border-radius: 6px; cursor: pointer; color: white; font-size: 18px; }
+        #send-btn { width: 60px; background: #3b82f6; font-weight: bold; font-size: 14px; margin-left: 8px; }
 
         /* SIDEBAR */
         #sidebar { width: 250px; background: #111827; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #334155; }
@@ -79,9 +108,8 @@
             
             <form id="form">
                 <input type="file" id="file-input" hidden>
-                <button type="button" class="icon-btn" id="clip-btn" title="Attach File">📎</button>
-                
-                <input id="input-msg" autocomplete="off" placeholder="Type message..." />
+                <button type="button" class="icon-btn" id="clip-btn">📎</button>
+                <input id="input-msg" autocomplete="off" placeholder="Type..." />
                 <button id="send-btn" class="icon-btn">➤</button>
             </form>
         </div>
@@ -96,8 +124,6 @@
     <script>
         const socket = io();
         let myName = "";
-
-        // Elements
         const loginScreen = document.getElementById('login-screen');
         const appContainer = document.getElementById('app-container');
         const usernameInput = document.getElementById('username');
@@ -109,50 +135,25 @@
         const fileInput = document.getElementById('file-input');
         const clipBtn = document.getElementById('clip-btn');
 
-        // --- FUNCTIONS ---
-
         function renderMessage(data) {
             const item = document.createElement('li');
-            
             if (data.type === 'text') {
-                // NORMAL TEXT
                 const isMe = data.user === myName;
                 item.className = isMe ? 'msg me' : 'msg others';
-                item.innerHTML = `
-                    <div class="meta"><span class="username">${data.user}</span><span>${data.time}</span></div>
-                    <div>${data.content}</div>
-                `;
-
+                item.innerHTML = `<div class="meta"><span class="username">${data.user}</span><span>${data.time}</span></div><div>${data.content}</div>`;
             } else if (data.type === 'file') {
-                // FILE / IMAGE
                 const isMe = data.user === myName;
                 item.className = isMe ? 'msg me' : 'msg others';
-                
-                let contentHtml = '';
-                // Check if it is an image
-                if (data.fileType.startsWith('image/')) {
-                    contentHtml = `<img src="${data.content}" class="chat-image" onclick="window.open(this.src)">`;
-                } else {
-                    // Other files (PDF, ZIP, etc) -> Link
-                    contentHtml = `📁 File: ${data.fileName} <a href="${data.content}" download="${data.fileName}" class="file-link">Download</a>`;
-                }
-
-                item.innerHTML = `
-                    <div class="meta"><span class="username">${data.user}</span><span>${data.time}</span></div>
-                    ${contentHtml}
-                `;
+                let contentHtml = data.fileType.startsWith('image/') 
+                    ? `<img src="${data.content}" class="chat-image" onclick="window.open(this.src)">` 
+                    : `📁 File: ${data.fileName} <a href="${data.content}" download="${data.fileName}" class="file-link">Download</a>`;
+                item.innerHTML = `<div class="meta"><span class="username">${data.user}</span><span>${data.time}</span></div>${contentHtml}`;
             }
-
-            // System Message
-            if (!data.type && data.user === undefined) { 
-                 // Handle legacy system messages if any
-            }
-
+            if (!data.type && data.user === undefined) return;
             messages.appendChild(item);
             messages.scrollTop = messages.scrollHeight;
         }
 
-        // Render System Message specific
         socket.on('system message', (text) => {
             const item = document.createElement('li');
             item.className = 'msg system';
@@ -166,16 +167,12 @@
             users.forEach(user => {
                 const li = document.createElement('li');
                 li.className = 'user-item';
-                const displayName = (user === myName) ? `${user} (YOU)` : user;
                 const style = (user === myName) ? 'color:#60a5fa; font-weight:bold;' : 'color:#e2e8f0;';
-                li.innerHTML = `<span class="status-dot"></span><span style="${style}">${displayName}</span>`;
+                li.innerHTML = `<span class="status-dot"></span><span style="${style}">${(user === myName) ? user + ' (YOU)' : user}</span>`;
                 userList.appendChild(li);
             });
         }
 
-        // --- EVENTS ---
-
-        // Login
         joinBtn.addEventListener('click', () => {
             const name = usernameInput.value.trim();
             if (name) {
@@ -187,50 +184,38 @@
         });
         usernameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') joinBtn.click(); });
 
-        // Send Text
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (inputMsg.value) {
                 socket.emit('chat message', inputMsg.value);
                 inputMsg.value = '';
-                inputMsg.focus();
+                inputMsg.focus(); // Keep keyboard up
             }
         });
 
-        // Click Clip -> Open File Dialog
-        clipBtn.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        // Handle File Selection
+        clipBtn.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
-                // Check size (Limit to 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert("File is too large! Max 5MB.");
-                    return;
-                }
-
+                if (file.size > 5 * 1024 * 1024) { alert("Max 5MB"); return; }
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    // Send to server
-                    socket.emit('upload', { 
-                        name: file.name, 
-                        type: file.type, 
-                        data: e.target.result // Base64 Data
-                    });
-                };
+                reader.onload = (e) => socket.emit('upload', { name: file.name, type: file.type, data: e.target.result });
                 reader.readAsDataURL(file);
-                this.value = ''; // Reset input
+                this.value = '';
             }
         });
 
-        // Socket Listeners
         socket.on('chat message', (data) => renderMessage(data));
-        socket.on('load history', (history) => { history.forEach(msg => renderMessage(msg)); });
+        socket.on('load history', (history) => history.forEach(msg => renderMessage(msg)));
         socket.on('update user list', (users) => updateUserList(users));
 
+        // Mobile viewport height fix
+        function setVh() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        window.addEventListener('resize', setVh);
+        setVh();
     </script>
 </body>
 </html>
