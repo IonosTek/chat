@@ -1,193 +1,219 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>IONOSTEK TACTICAL CHAT</title>
+    <title>IonosTek Communication Hub</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- TACTICAL THEME SETTINGS --- */
+        /* --- IONOSTEK MODERN THEME --- */
         :root {
-            --bg-color: #001014;       /* พื้นหลังดำอมเขียวขี้ม้าเข้มๆ */
-            --panel-bg: #00222b;       /* สีพื้นหลังกล่อง */
-            --text-color: #00ffcc;     /* สีตัวหนังสือ (Cyan แบบจอเรดาร์) */
-            --accent-color: #ff3333;   /* สีเน้น (แดง) สำหรับ User */
-            --border-color: #004455;   /* ขอบตาราง */
-            --time-color: #88aadd;     /* สีเวลา */
+            --bg-color: #0f172a;       /* Dark Slate Background */
+            --sidebar-bg: #1e293b;     /* Lighter Slate for Sidebar */
+            --input-bg: #334155;       /* Input Fields */
+            --text-primary: #f8fafc;   /* White Text */
+            --text-secondary: #94a3b8; /* Gray Text (Time) */
+            --accent-color: #3b82f6;   /* Ionos Blue (Primary Button) */
+            --accent-hover: #2563eb;   /* Darker Blue (Hover) */
+            --system-msg: #facc15;     /* Yellow for System Msg */
+            --border-color: #334155;
         }
 
         body { 
             margin: 0; 
-            font-family: 'Courier New', Courier, monospace; /* ฟอนต์พิมพ์ดีด */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color); 
-            color: var(--text-color);
+            color: var(--text-primary);
             display: flex; 
             flex-direction: column; 
             height: 100vh; 
         }
         
-        /* หน้า Login สไตล์ทหาร */
+        /* Login Screen */
         #login-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--bg-color); 
             display: flex; justify-content: center; align-items: center; z-index: 99; 
+            background-image: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
         }
         #login-box { 
-            background: var(--panel-bg); 
-            padding: 30px; 
-            border: 2px solid var(--text-color); 
+            background: var(--sidebar-bg); 
+            padding: 40px; 
+            border-radius: 12px;
             text-align: center; 
-            box-shadow: 0 0 15px var(--text-color); /* เอฟเฟกต์เรืองแสง */
-            width: 300px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 320px;
+            border: 1px solid var(--border-color);
         }
-        h2 { margin-top: 0; letter-spacing: 2px; text-shadow: 0 0 5px var(--text-color); }
+        h2 { margin-top: 0; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+        .subtitle { color: var(--text-secondary); font-size: 0.9em; margin-bottom: 25px; }
         
         input { 
-            background: #000; 
-            color: var(--text-color); 
+            background: var(--input-bg); 
+            color: var(--text-primary); 
             border: 1px solid var(--border-color); 
-            padding: 10px; 
+            padding: 12px; 
+            border-radius: 6px;
             font-family: inherit; 
             text-align: center; 
             text-transform: uppercase;
-            width: 80%;
+            width: 100%;
+            box-sizing: border-box; /* Fix padding issue */
             outline: none;
+            font-weight: 600;
+            transition: 0.2s;
         }
+        input:focus { border-color: var(--accent-color); }
         
         button { 
-            margin-top: 15px;
-            padding: 10px 25px; 
-            background: var(--border-color); 
-            color: #fff; 
-            border: 1px solid var(--text-color); 
+            margin-top: 20px;
+            padding: 12px 25px; 
+            background: var(--accent-color); 
+            color: white; 
+            border: none;
+            border-radius: 6px;
             font-family: inherit; 
-            font-weight: bold; 
+            font-weight: 600; 
             cursor: pointer; 
-            transition: 0.3s;
+            transition: 0.2s;
+            width: 100%;
         }
-        button:hover { background: var(--text-color); color: #000; box-shadow: 0 0 10px var(--text-color); }
+        button:hover { background: var(--accent-hover); transform: translateY(-1px); }
         
-        /* Layout หลัก */
+        /* Main Layout */
         #main-container { display: flex; flex: 1; overflow: hidden; display: none; }
         
-        /* พื้นที่แชท (ซ้าย) */
+        /* Chat Area (Left) */
         #chat-area { 
-            flex: 3; 
+            flex: 1; 
             background-color: var(--bg-color); 
-            border-right: 2px solid var(--border-color); 
             overflow-y: scroll; 
-            padding: 15px; 
+            padding: 20px; 
             display: flex; 
             flex-direction: column; 
+            gap: 8px;
         }
         
-        /* Scrollbar สวยๆ */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); }
-
         .message-line { 
-            border-bottom: 1px dashed #003344; 
-            padding: 4px 0; 
+            background: rgba(255,255,255,0.03);
+            padding: 8px 12px; 
+            border-radius: 6px;
             font-size: 15px; 
             line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
         }
-        .time { color: var(--time-color); font-weight: bold; margin-right: 8px; font-size: 0.9em; }
-        .user { color: var(--accent-color); font-weight: bold; margin-right: 5px; }
-        .msg { color: var(--text-color); text-shadow: 0 0 2px rgba(0,255,204,0.3); }
+        .time { color: var(--text-secondary); font-size: 0.85em; margin-right: 12px; min-width: 50px; padding-top: 2px;}
+        .user { color: var(--accent-color); font-weight: 700; margin-right: 8px; white-space: nowrap; }
+        .msg { color: var(--text-primary); word-break: break-word; }
 
-        /* พื้นที่รายชื่อคนออนไลน์ (ขวา) */
+        /* Sidebar (Right) */
         #user-list-area { 
-            flex: 1; 
-            background-color: var(--panel-bg); 
-            padding: 10px; 
+            width: 250px;
+            background-color: var(--sidebar-bg); 
+            padding: 20px; 
             overflow-y: auto; 
-            max-width: 250px; 
-            border-left: 1px solid #000;
+            border-left: 1px solid var(--border-color);
+            display: none; /* Mobile hidden by default */
         }
+        /* Show sidebar on larger screens */
+        @media (min-width: 768px) {
+            #user-list-area { display: block; }
+        }
+
         #user-list-area h3 { 
-            border-bottom: 2px solid var(--text-color); 
-            font-size: 14px; 
-            text-align: center; 
-            padding-bottom: 5px;
-            color: #fff;
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color); 
+            font-size: 13px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
         .online-user { 
-            color: var(--text-color); 
-            font-weight: bold; 
-            display: block; 
-            margin-bottom: 5px; 
-            padding-left: 10px;
-            border-left: 3px solid var(--border-color);
+            color: var(--text-primary); 
+            font-weight: 500; 
+            display: flex; 
+            align-items: center;
+            margin-bottom: 8px; 
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+        .online-dot {
+            height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; margin-right: 10px; display: inline-block;
         }
 
-        /* กล่องพิมพ์ข้อความ (ล่าง) */
+        /* Input Area (Bottom) */
         #input-area { 
-            background: var(--panel-bg); 
-            padding: 15px; 
+            background: var(--sidebar-bg); 
+            padding: 20px; 
             display: flex; 
-            border-top: 2px solid var(--border-color); 
+            gap: 10px;
+            border-top: 1px solid var(--border-color); 
             display: none; 
         }
         #input { 
             flex: 1; 
             text-align: left; 
-            border: 1px solid var(--text-color);
+            text-transform: none; /* Allow normal case */
+            background: var(--bg-color);
+            border-color: var(--border-color);
         }
         #send-btn {
+            width: auto;
             margin-top: 0;
-            margin-left: 10px;
-            background: var(--bg-color);
+            padding: 0 30px;
         }
 
     </style>
 </head>
 <body>
 
-    <audio id="beep-sound">
-        <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU..." type="audio/wav">
-        </audio>
+    <script>
+        // Beep Sound Logic
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep() {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'sine'; // Sine wave is softer/modern
+            oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+    </script>
 
     <div id="login-screen">
         <div id="login-box">
-            <h2>SECURE LINK</h2>
-            <p style="font-size: 12px; margin-bottom: 20px;">AUTHORIZATION REQUIRED</p>
-            <input id="callsign-input" placeholder="CALLSIGN" autocomplete="off">
-            <br>
-            <button onclick="login()">ESTABLISH LINK</button>
+            <h2>IONOSTEK</h2>
+            <div class="subtitle">Secure Communication Relay</div>
+            <input id="callsign-input" placeholder="ENTER CALLSIGN" autocomplete="off" maxlength="10">
+            <button onclick="login()">CONNECT</button>
         </div>
     </div>
 
     <div id="main-container">
         <div id="chat-area"></div>
         <div id="user-list-area">
-            <h3>ACTIVE STATIONS</h3>
+            <h3>Online Stations</h3>
             <div id="users"></div>
         </div>
     </div>
 
     <form id="input-area" action="">
-        <input id="input" autocomplete="off" placeholder="TRANSMIT MESSAGE..." />
-        <button id="send-btn">TX</button>
+        <input id="input" autocomplete="off" placeholder="Type a message..." />
+        <button id="send-btn">SEND</button>
     </form>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
         var myCallsign = "";
-        
-        // สร้างเสียง Beep สั้นๆ ความถี่ 800Hz แบบวิทยุ
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBeep() {
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.type = 'square'; // เสียงแบบดิจิตอล
-            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // ความถี่ 800Hz
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // ความดัง 10%
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.1); // ดังแค่ 0.1 วินาที
-        }
 
         function login() {
             var input = document.getElementById('callsign-input');
@@ -198,7 +224,7 @@
                 document.getElementById('input-area').style.display = 'flex';
                 socket.emit('join', myCallsign);
                 
-                // กระตุ้น Audio Context ให้พร้อมใช้งาน
+                // Initialize Audio Context
                 if (audioCtx.state === 'suspended') { audioCtx.resume(); }
             }
         }
@@ -220,20 +246,23 @@
             var item = document.createElement('div');
             item.className = 'message-line';
             
-            // จัดรูปแบบเวลาและข้อความ
-            var timeHtml = `<span class="time">[${data.time}z]</span>`;
-            var userHtml = `<span class="user">&lt;${data.user}&gt;</span>`;
+            var userHtml = `<span class="user">${data.user}</span>`;
             
-            // ถ้าเป็นข้อความจากระบบ ให้เป็นสีเหลือง
+            // System Message Styling
             if(data.user === 'SYSTEM') {
-                userHtml = `<span class="user" style="color:yellow;">&lt;SYSTEM&gt;</span>`;
+                userHtml = `<span class="user" style="color: var(--system-msg);">SYSTEM</span>`;
             }
 
-            item.innerHTML = `${timeHtml} ${userHtml} <span class="msg">${data.msg}</span>`;
+            item.innerHTML = `
+                <span class="time">${data.time}z</span>
+                ${userHtml} 
+                <span class="msg">${data.msg}</span>
+            `;
+            
             chatArea.appendChild(item);
             chatArea.scrollTop = chatArea.scrollHeight;
 
-            // เล่นเสียง Beep (ถ้าไม่ใช่ข้อความที่เราส่งเอง)
+            // Beep Sound (Incoming only)
             if (data.user !== myCallsign) {
                 playBeep();
             }
@@ -245,14 +274,13 @@
                 var div = document.createElement('div');
                 div.className = 'online-user';
                 
-                // ไฮไลท์ชื่อตัวเอง
+                var label = u;
                 if(u === myCallsign) {
-                    div.style.color = "#ff3333";
-                    div.textContent = u + " (YOU)";
-                } else {
-                    div.textContent = u;
+                    label += " (YOU)";
+                    div.style.color = "var(--accent-color)";
                 }
                 
+                div.innerHTML = `<span class="online-dot"></span> ${label}`;
                 usersDiv.appendChild(div);
             });
         });
