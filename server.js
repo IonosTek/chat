@@ -4,7 +4,7 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
-// ตั้งค่า Socket.io ให้รองรับรูปภาพขนาดใหญ่ (5MB)
+// ตั้งค่า Socket.io (รองรับรูปภาพ 5MB)
 const io = new Server(server, {
     cors: { origin: "*" }, 
     maxHttpBufferSize: 5e6 
@@ -17,7 +17,7 @@ const HISTORY_LIMIT = 24 * 60 * 60 * 1000; // 24 ชม.
 
 // เสิร์ฟไฟล์ index.html
 app.get('/', (req, res) => {
-  // ใช้ path นี้เพื่อความชัวร์
+  // ใช้ path.join เพื่อความชัวร์เรื่อง Path ของไฟล์
   res.sendFile(__dirname + '/index.html');
 });
 
@@ -25,12 +25,11 @@ io.on('connection', (socket) => {
   console.log('New connection: ' + socket.id);
 
   socket.on('join', (callsign) => {
-    // ถ้าไม่มีชื่อ หรือชื่อว่าง ให้หยุดทำงาน
     if (!callsign) return;
     
     users[socket.id] = callsign;
     
-    // --- ระบบส่งประวัติเก่า (ใส่ระบบกัน Server ล่มไว้) ---
+    // --- ระบบส่งประวัติเก่า (Safe Mode) ---
     try {
         const now = Date.now();
         // กรองเอาเฉพาะข้อความที่ไม่หมดอายุ
@@ -43,9 +42,9 @@ io.on('connection', (socket) => {
             }
         });
     } catch (e) {
-        console.error("History Error (Server ไม่พัง):", e);
+        console.error("History Error (Ignored):", e);
     }
-    // ------------------------------------------------
+    // ------------------------------------
 
     io.emit('user list', Object.values(users));
     
@@ -87,7 +86,7 @@ io.on('connection', (socket) => {
           // บันทึกลงประวัติ
           messageHistory.push({ type: type, data: dataPackage, timestamp: now });
           
-          // ลบของเก่าทิ้ง (กัน Server หน่วง) ถ้าเยอะเกิน 500 ข้อความ
+          // ลบของเก่าทิ้ง (กัน Memory เต็ม)
           if (messageHistory.length > 500) { 
               messageHistory.shift(); 
           }
