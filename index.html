@@ -21,7 +21,7 @@
 
         body { 
             margin: 0; 
-            /* ใช้ Kanit เป็นตัวรองรับภาษาไทย */
+            /* Font Stack: Inter for Eng, Kanit for Thai */
             font-family: 'Inter', 'Kanit', sans-serif;
             background-color: var(--bg-color); 
             color: var(--text-primary);
@@ -63,8 +63,13 @@
             font-weight: 400;
             transition: 0.2s;
         }
-        /* Callsign ยังคงบังคับตัวใหญ่ */
-        #callsign-input { text-transform: uppercase; font-weight: 600; }
+        
+        /* Callsign input: Force Uppercase */
+        #callsign-input { 
+            text-transform: uppercase; 
+            font-weight: 600; 
+            letter-spacing: 1px;
+        }
         
         input:focus { border-color: var(--accent-color); }
         
@@ -102,7 +107,7 @@
             padding: 8px 12px; 
             border-radius: 6px;
             font-size: 15px; 
-            line-height: 1.6; /* เพิ่มความสูงบรรทัดให้อ่านไทยง่ายขึ้น */
+            line-height: 1.6; /* Increased line-height for Thai legibility */
             display: flex;
             align-items: flex-start;
         }
@@ -159,7 +164,7 @@
         #input { 
             flex: 1; 
             text-align: left; 
-            text-transform: none; /* สำคัญ! ไม่บังคับตัวใหญ่ เพื่อให้พิมพ์ไทยได้ปกติ */
+            text-transform: none; /* Important: Allows lowercase and Thai characters */
             background: var(--bg-color);
             border-color: var(--border-color);
         }
