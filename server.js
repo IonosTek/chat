@@ -3,9 +3,12 @@ const http = require('http');
 const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-// Store connected users
+// เพิ่ม maxHttpBufferSize เพื่อให้ส่งรูปภาพได้ (ตั้งไว้ 5MB)
+const io = new Server(server, {
+    maxHttpBufferSize: 5 * 1024 * 1024 
+});
+
 let users = {};
 
 app.get('/', (req, res) => {
@@ -15,15 +18,11 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('New connection established');
 
-  // Handle user joining
   socket.on('join', (callsign) => {
-    // Prevent empty callsigns
     if (!callsign) return;
-    
     users[socket.id] = callsign;
-    io.emit('user list', Object.values(users)); // Update user list for everyone
+    io.emit('user list', Object.values(users));
     
-    // System notification
     const time = new Date().toISOString().slice(11, 16);
     io.emit('chat message', { 
         time: time, 
@@ -32,7 +31,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // Handle chat messages
   socket.on('chat message', (msg) => {
     if (!msg) return;
     const time = new Date().toISOString().slice(11, 16);
@@ -40,7 +38,15 @@ io.on('connection', (socket) => {
     io.emit('chat message', { time: time, user: callsign, msg: msg });
   });
 
-  // Handle disconnect
+  // --- ส่วนที่เพิ่มใหม่: รองรับการส่งรูปภาพ ---
+  socket.on('chat image', (data) => {
+      const time = new Date().toISOString().slice(11, 16);
+      const callsign = users[socket.id] || 'Guest';
+      // data คือ base64 string ของรูปภาพ
+      io.emit('chat image', { time: time, user: callsign, image: data });
+  });
+  // ---------------------------------------
+
   socket.on('disconnect', () => {
     if (users[socket.id]) {
         io.emit('user list', Object.values(users));
@@ -49,7 +55,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// Render provides the PORT via environment variable
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
