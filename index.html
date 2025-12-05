@@ -5,113 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IonosTek Communication Hub</title>
     <style>
-        /* --- CSS STYLES --- */
+        /* CSS STYLES */
         body {
             margin: 0;
             padding: 0;
-            background-color: #0f172a; /* Dark Blue Background */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a; /* Dark Background */
+            font-family: sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: #ffffff;
+            color: white;
         }
-
         .login-card {
-            background-color: #1e293b; /* Slightly lighter card background */
+            background-color: #1e293b;
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             text-align: center;
-            width: 350px;
+            width: 320px;
         }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-            font-weight: bold;
-            color: #e2e8f0;
-        }
-
-        p.subtitle {
-            font-size: 14px;
-            color: #94a3b8;
-            margin-bottom: 30px;
-        }
-
-        input[type="text"] {
+        h1 { margin: 0; font-size: 24px; letter-spacing: 1px; }
+        p { color: #94a3b8; font-size: 14px; margin-top: 5px; margin-bottom: 30px; }
+        
+        input {
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
-            border: 1px solid #334155;
-            border-radius: 6px;
             background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 6px;
             color: white;
             font-size: 16px;
-            box-sizing: border-box; /* Ensures padding doesn't affect width */
             text-align: center;
+            box-sizing: border-box;
         }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
+        input:focus { outline: none; border-color: #3b82f6; }
 
         button {
             width: 100%;
             padding: 12px;
-            background-color: #3b82f6; /* Blue Button */
+            background-color: #3b82f6;
             color: white;
             border: none;
             border-radius: 6px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
-
-        button:hover {
-            background-color: #2563eb;
-        }
+        button:hover { background-color: #2563eb; }
     </style>
 </head>
 <body>
 
     <div class="login-card">
         <h1>IONOSTEK</h1>
-        <p class="subtitle">Secure Communication Relay</p>
+        <p>Secure Communication Relay</p>
 
         <input type="text" id="username" placeholder="MAX" autocomplete="off">
-
+        
         <button id="login-btn">CONNECT</button>
     </div>
 
     <script>
-        const usernameInput = document.getElementById('username');
-        const loginButton = document.getElementById('login-btn');
+        // --- JAVASCRIPT LOGIC ---
+        const inputField = document.getElementById('username');
+        const btn = document.getElementById('login-btn');
 
-        // 1. Function to handle the connection logic
-        function connectUser() {
-            const username = usernameInput.value.trim();
-            if (username) {
-                alert("Connecting as: " + username); 
-                // TODO: Add your actual redirect or socket logic here
-                // Example: window.location.href = "/chat?user=" + username;
+        // Function to handle login
+        function doLogin() {
+            const name = inputField.value.trim();
+            if (name) {
+                // For now, just show an alert. 
+                // Later, you can redirect to chat page: window.location.href = '/chat';
+                alert("Connecting to IonosTek Network as: " + name);
             } else {
-                alert("Please enter a username.");
+                alert("Please enter your callsign or name.");
             }
         }
 
-        // 2. Click Event Listener
-        loginButton.addEventListener('click', connectUser);
+        // 1. Click Listener
+        btn.addEventListener('click', doLogin);
 
-        // 3. Enter Key Event Listener
-        usernameInput.addEventListener('keypress', function (e) {
+        // 2. Enter Key Listener
+        inputField.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                e.preventDefault(); // Stop page refresh
-                loginButton.click(); // Trigger the button click
+                doLogin();
             }
         });
     </script>
