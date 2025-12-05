@@ -5,7 +5,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// เก็บรายชื่อผู้ใช้งาน (Callsign)
+// Store connected users
 let users = {};
 
 app.get('/', (req, res) => {
@@ -13,15 +13,18 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('New connection');
+  console.log('New connection established');
 
-  // เมื่อมีคน Join ด้วย Callsign
+  // Handle user joining
   socket.on('join', (callsign) => {
-    users[socket.id] = callsign;
-    io.emit('user list', Object.values(users)); // อัปเดตรายชื่อคนออนไลน์
+    // Prevent empty callsigns
+    if (!callsign) return;
     
-    // ส่งข้อความเข้าระบบ
-    const time = new Date().toISOString().slice(11, 16); // เวลา UTC แบบย่อ
+    users[socket.id] = callsign;
+    io.emit('user list', Object.values(users)); // Update user list for everyone
+    
+    // System notification
+    const time = new Date().toISOString().slice(11, 16);
     io.emit('chat message', { 
         time: time, 
         user: 'SYSTEM', 
@@ -29,14 +32,15 @@ io.on('connection', (socket) => {
     });
   });
 
-  // เมื่อมีคนส่งข้อความ
+  // Handle chat messages
   socket.on('chat message', (msg) => {
-    const time = new Date().toISOString().slice(11, 16); // เวลา UTC
-    const callsign = users[socket.id] || 'Anonymous';
+    if (!msg) return;
+    const time = new Date().toISOString().slice(11, 16);
+    const callsign = users[socket.id] || 'Guest';
     io.emit('chat message', { time: time, user: callsign, msg: msg });
   });
 
-  // เมื่อคนออกจากห้อง
+  // Handle disconnect
   socket.on('disconnect', () => {
     if (users[socket.id]) {
         io.emit('user list', Object.values(users));
@@ -45,6 +49,7 @@ io.on('connection', (socket) => {
   });
 });
 
+// Render provides the PORT via environment variable
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
