@@ -1,357 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>IonosTek Communication Hub</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IonosTek Communication Hub</title>
     <style>
-        /* --- IONOSTEK MODERN THEME --- */
-        :root {
-            --bg-color: #0f172a;
-            --sidebar-bg: #1e293b;
-            --input-bg: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --system-msg: #facc15;
-            --border-color: #334155;
+        /* --- CSS STYLES --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a; /* Dark Blue Background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #ffffff;
         }
 
-        body { 
-            margin: 0; 
-            font-family: 'Inter', 'Kanit', sans-serif;
-            background-color: var(--bg-color); 
-            color: var(--text-primary);
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            overflow: hidden; /* ป้องกันหน้าเลื่อน */
-        }
-        
-        /* Login Screen */
-        #login-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
-            display: flex; justify-content: center; align-items: center; z-index: 999; 
-        }
-        #login-box { 
-            background: var(--sidebar-bg); 
-            padding: 40px; 
+        .login-card {
+            background-color: #1e293b; /* Slightly lighter card background */
+            padding: 40px;
             border-radius: 12px;
-            text-align: center; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 90%; max-width: 320px;
-            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 350px;
         }
-        
-        input { 
-            background: var(--input-bg); 
-            color: var(--text-primary); 
-            border: 1px solid var(--border-color); 
-            padding: 12px; 
-            border-radius: 6px;
-            font-family: inherit; 
-            text-align: center; 
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            font-weight: bold;
+            color: #e2e8f0;
+        }
+
+        p.subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
             width: 100%;
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.2s;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            background-color: #334155;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+            text-align: center;
         }
-        #callsign-input { text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
-        input:focus { border-color: var(--accent-color); }
-        
-        button { 
-            padding: 12px 25px; 
-            background: var(--accent-color); 
-            color: white; 
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3b82f6; /* Blue Button */
+            color: white;
             border: none;
             border-radius: 6px;
-            font-family: inherit; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: 0.2s;
-        }
-        button:hover { background: var(--accent-hover); }
-        .login-btn { width: 100%; margin-top: 20px; }
-
-        /* Header (Mobile Only) */
-        #mobile-header {
-            display: none;
-            padding: 10px 15px;
-            background: var(--sidebar-bg);
-            border-bottom: 1px solid var(--border-color);
-            justify-content: space-between;
-            align-items: center;
-        }
-        #mobile-header h3 { margin: 0; font-size: 16px; }
-        .icon-btn { background: transparent; padding: 5px; font-size: 1.2em; }
-
-        /* Main Layout */
-        #main-container { display: flex; flex: 1; overflow: hidden; display: none; position: relative; }
-        
-        /* Chat Area */
-        #chat-area { 
-            flex: 1; 
-            background-color: var(--bg-color); 
-            overflow-y: scroll; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px;
-        }
-        
-        .message-line { 
-            background: rgba(255,255,255,0.03);
-            padding: 8px 12px; 
-            border-radius: 8px;
-            font-size: 15px; 
-            line-height: 1.6;
-            display: flex;
-            align-items: flex-start;
-            flex-wrap: wrap;
-        }
-        .time { color: var(--text-secondary); font-size: 0.75em; margin-right: 10px; min-width: 45px; padding-top: 3px;}
-        .user { color: var(--accent-color); font-weight: 700; margin-right: 8px; white-space: nowrap; }
-        .msg { color: var(--text-primary); word-break: break-word; font-weight: 300; width: 100%; display: block; margin-top: 2px;}
-        
-        /* Image in Chat */
-        .chat-img {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 8px;
-            margin-top: 5px;
-            border: 1px solid var(--border-color);
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
 
-        /* Sidebar (User List) */
-        #user-list-area { 
-            width: 250px;
-            background-color: var(--sidebar-bg); 
-            padding: 20px; 
-            overflow-y: auto; 
-            border-left: 1px solid var(--border-color);
-            display: none; /* Default hidden on mobile */
-        }
-        /* Mobile Overlay for User List */
-        #user-list-area.show-mobile {
-            display: block;
-            position: absolute;
-            top: 0; right: 0; bottom: 0;
-            width: 80%;
-            z-index: 100;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
-        }
-
-        #user-list-area h3 { 
-            margin-top: 0;
-            border-bottom: 1px solid var(--border-color); 
-            font-size: 13px; color: var(--text-secondary);
-            padding-bottom: 10px; margin-bottom: 15px;
-        }
-        .online-user { 
-            color: var(--text-primary); 
-            display: flex; align-items: center;
-            margin-bottom: 8px; 
-            padding: 8px;
-            background: rgba(255,255,255,0.05); border-radius: 4px;
-        }
-        .online-dot { height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; margin-right: 10px; }
-
-        /* Input Area */
-        #input-area { 
-            background: var(--sidebar-bg); 
-            padding: 10px 15px; 
-            display: flex; align-items: center; gap: 10px;
-            border-top: 1px solid var(--border-color); 
-            display: none; 
-        }
-        #input { 
-            flex: 1; text-align: left; text-transform: none;
-            background: var(--bg-color); border-color: var(--border-color);
-            height: 40px;
-        }
-        
-        /* Upload Button */
-        #upload-label {
-            cursor: pointer;
-            padding: 8px;
-            color: var(--text-secondary);
-            font-size: 1.5em;
-        }
-        #upload-label:hover { color: var(--text-primary); }
-        
-        #send-btn { width: auto; margin-top: 0; padding: 0 20px; height: 40px;}
-
-        /* Responsive */
-        @media (min-width: 768px) {
-            #user-list-area { display: block; position: static; width: 250px; box-shadow: none; }
-            #mobile-header { display: none; } /* ซ่อน Header บน PC */
-            .msg { width: auto; display: inline; margin-top: 0; }
-        }
-        @media (max-width: 767px) {
-            #mobile-header { display: flex; } /* โชว์ Header บนมือถือ */
+        button:hover {
+            background-color: #2563eb;
         }
     </style>
 </head>
 <body>
 
+    <div class="login-card">
+        <h1>IONOSTEK</h1>
+        <p class="subtitle">Secure Communication Relay</p>
+
+        <input type="text" id="username" placeholder="MAX" autocomplete="off">
+
+        <button id="login-btn">CONNECT</button>
+    </div>
+
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBeep() {
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            const o = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            o.type = 'sine'; o.frequency.setValueAtTime(1000, audioCtx.currentTime);
-            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            o.connect(g); g.connect(audioCtx.destination);
-            o.start(); o.stop(audioCtx.currentTime + 0.15);
-        }
-    </script>
+        const usernameInput = document.getElementById('username');
+        const loginButton = document.getElementById('login-btn');
 
-    <div id="login-screen">
-        <div id="login-box">
-            <h2>IONOSTEK</h2>
-            <div style="color:#94a3b8; margin-bottom: 20px; font-weight: 300;">Secure Communication Relay</div>
-            <input id="callsign-input" placeholder="ENTER CALLSIGN" autocomplete="off" maxlength="10">
-            <button class="login-btn" onclick="login()">CONNECT</button>
-        </div>
-    </div>
-
-    <div id="mobile-header">
-        <h3>IONOSTEK</h3>
-        <button class="icon-btn" onclick="toggleUsers()">👥</button>
-    </div>
-
-    <div id="main-container">
-        <div id="chat-area" onclick="closeUsers()"></div> <div id="user-list-area">
-            <h3>Online Stations <span style="float:right; cursor:pointer;" onclick="toggleUsers()" class="close-mobile">✕</span></h3>
-            <div id="users"></div>
-        </div>
-    </div>
-
-    <form id="input-area" action="">
-        <label id="upload-label" for="file-input">📎</label>
-        <input type="file" id="file-input" accept="image/*" hidden>
-        
-        <input id="input" autocomplete="off" placeholder="Type message..." />
-        <button id="send-btn">SEND</button>
-    </form>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io();
-        var myCallsign = "";
-
-        // UI Toggles
-        function toggleUsers() {
-            var list = document.getElementById('user-list-area');
-            list.classList.toggle('show-mobile');
-        }
-        function closeUsers() {
-            document.getElementById('user-list-area').classList.remove('show-mobile');
-        }
-
-        function login() {
-            var input = document.getElementById('callsign-input');
-            if (input.value.trim() !== "") {
-                myCallsign = input.value.toUpperCase();
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-container').style.display = 'flex';
-                document.getElementById('input-area').style.display = 'flex';
-                // Show header only on mobile check is done via CSS
-                
-                socket.emit('join', myCallsign);
-                if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            }
-        }
-
-        var form = document.getElementById('input-area');
-        var input = document.getElementById('input');
-        var fileInput = document.getElementById('file-input');
-        var chatArea = document.getElementById('chat-area');
-        var usersDiv = document.getElementById('users');
-
-        // Text Send
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (input.value) {
-                socket.emit('chat message', input.value);
-                input.value = '';
-            }
-        });
-
-        // File Upload Logic
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                // Check size (Max 2MB)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert("File too large! Max 2MB.");
-                    this.value = '';
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // Send base64 data
-                    socket.emit('chat image', e.target.result);
-                };
-                reader.readAsDataURL(file);
-                this.value = ''; // Reset input
-            }
-        });
-
-        // Receive Text
-        socket.on('chat message', function(data) {
-            appendMessage(data, false);
-        });
-
-        // Receive Image
-        socket.on('chat image', function(data) {
-            appendMessage(data, true);
-        });
-
-        function appendMessage(data, isImage) {
-            var item = document.createElement('div');
-            item.className = 'message-line';
-            
-            var userHtml = `<span class="user">${data.user}</span>`;
-            if(data.user === 'SYSTEM') {
-                userHtml = `<span class="user" style="color: var(--system-msg);">SYSTEM</span>`;
-            }
-
-            let contentHtml = "";
-            if (isImage) {
-                contentHtml = `<br><img src="${data.image}" class="chat-img" onclick="window.open(this.src)">`;
+        // 1. Function to handle the connection logic
+        function connectUser() {
+            const username = usernameInput.value.trim();
+            if (username) {
+                alert("Connecting as: " + username); 
+                // TODO: Add your actual redirect or socket logic here
+                // Example: window.location.href = "/chat?user=" + username;
             } else {
-                contentHtml = `<span class="msg">${data.msg}</span>`;
+                alert("Please enter a username.");
             }
-
-            item.innerHTML = `
-                <span class="time">${data.time}z</span>
-                ${userHtml} 
-                ${contentHtml}
-            `;
-            
-            chatArea.appendChild(item);
-            chatArea.scrollTop = chatArea.scrollHeight;
-
-            if (data.user !== myCallsign) playBeep();
         }
 
-        socket.on('user list', function(users) {
-            usersDiv.innerHTML = "";
-            users.forEach(function(u) {
-                var div = document.createElement('div');
-                div.className = 'online-user';
-                if(u === myCallsign) { div.style.color = "var(--accent-color)"; u += " (YOU)"; }
-                div.innerHTML = `<span class="online-dot"></span> ${u}`;
-                usersDiv.appendChild(div);
-            });
+        // 2. Click Event Listener
+        loginButton.addEventListener('click', connectUser);
+
+        // 3. Enter Key Event Listener
+        usernameInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Stop page refresh
+                loginButton.click(); // Trigger the button click
+            }
         });
     </script>
+
 </body>
 </html>
