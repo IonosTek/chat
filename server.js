@@ -6,9 +6,9 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 
-// เพิ่ม maxHttpBufferSize เพื่อให้ส่งไฟล์ขนาดใหญ่ขึ้นได้ (ตั้งไว้ 10MB)
+// เพิ่ม maxHttpBufferSize เพื่อให้ส่งไฟล์ขนาดใหญ่ขึ้นได้ (ตั้งไว้ 5MB)
 const io = new Server(server, {
-    maxHttpBufferSize: 1e7 
+    maxHttpBufferSize: 5e6 
 });
 
 const port = process.env.PORT || 3000;
@@ -39,14 +39,14 @@ io.on('connection', (socket) => {
         saveAndBroadcast(msgData);
     });
 
-    // 3. File Upload (Image/File)
+    // 3. File Upload (Image/File) - ส่วนที่เพิ่มมาใหม่
     socket.on('upload', (fileData) => {
         const time = new Date().toISOString().substring(11, 16) + " UTC";
         // fileData { name, type, data }
         const msgData = { 
             type: 'file', 
             user: socket.username, 
-            content: fileData.data, // Base64 string
+            content: fileData.data, // ข้อมูลไฟล์แบบ Base64
             fileName: fileData.name,
             fileType: fileData.type,
             time: time 
